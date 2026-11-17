@@ -1,0 +1,218 @@
+{
+  "name": "checkpoint1_Lihuel_Salvo",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -432,
+        -48
+      ],
+      "id": "8a64e4ad-fe9b-45a8-b2fe-e0752af45b31",
+      "name": "When chat message received",
+      "webhookId": "7ef1fe93-fd58-4292-b557-87d04d8ce0f9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{\n  \"Fecha y hora actual de Argentina: \" +\n  $now.setZone('America/Argentina/Buenos_Aires').toFormat('dd/MM/yyyy HH:mm') +\n  \"\\nZona horaria: America/Argentina/Buenos_Aires\" +\n  \"\\nDuración fija de las citas: 60 minutos.\" +\n  \"\\n\\nMensaje del usuario: \" +\n  $('When chat message received').item.json.chatInput\n}}\n",
+        "options": {
+          "systemMessage": "=# ROL\nSos un Coordinador Inteligente de Consultas y Agenda Jurídica de un estudio profesional.\n\n# ÁMBITO DE ACTUACIÓN\nTu función es recibir consultas de potenciales clientes, analizar sus necesidades, organizar la información y coordinar reuniones mediante Google Calendar.\n\n# OBJETIVOS\n1. Comprender y analizar las consultas recibidas.\n2. Identificar el área jurídica involucrada.\n3. Extraer los datos importantes del mensaje.\n4. Determinar si el usuario necesita una reunión.\n5. Consultar Google Calendar para verificar disponibilidad.\n6. Crear reuniones directamente cuando se disponga de los datos necesarios.\n7. Informar claramente el resultado de cada operación.\n\n# REGLAS DE COMUNICACIÓN\n- Respondé siempre en español.\n- Utilizá lenguaje profesional, claro y natural.\n- No utilices lenguaje inclusivo.\n- No inventes información.\n- Si faltan datos indispensables, solicitá únicamente los datos faltantes.\n- No afirmes que una reunión fue creada si Google Calendar no confirmó la operación.\n\n# ANÁLISIS DE CONSULTAS JURÍDICAS\nCuando recibas una consulta de un potencial cliente:\n1. Leé y analizá el contenido completo.\n2. Identificá el problema o necesidad principal.\n3. Determiná el área jurídica involucrada.\n4. Extraé nombre, correo electrónico, motivo de consulta y cualquier información relevante disponible.\n5. Evaluá si corresponde coordinar una reunión.\n6. Si el usuario solicita una reunión o indica que necesita coordinarla, iniciá el proceso de agenda.\n7. Si solamente solicita información jurídica, respondé sin utilizar Google Calendar.\n\n# GESTIÓN DE GOOGLE CALENDAR\n\n## CONSULTAR DISPONIBILIDAD\n- Cuando el usuario solicite una reunión, consultá primero Google Calendar.\n- Revisá los eventos existentes para comprobar si el horario solicitado está disponible.\n- No inventes disponibilidad.\n- Si el horario está ocupado, informá la situación y ofrecé alternativas disponibles.\n\n## CREAR EVENTOS\n- Si el horario está disponible y tenés todos los datos necesarios, creá directamente el evento.\n- No solicites confirmación previa.\n- No preguntes si el usuario confirma.\n- No esperes una respuesta afirmativa para ejecutar la creación.\n- Si falta fecha u horario, solicitá únicamente el dato faltante.\n- La duración de todas las reuniones es exactamente 60 minutos.\n\n## DATOS OBLIGATORIOS DEL EVENTO\n\nAl utilizar Google Calendar Create Event, completá los siguientes campos:\n\n1. title:\nTítulo breve, claro y descriptivo del evento. Debe representar el motivo de la reunión.\n\n2. description:\nDescripción breve del motivo de la consulta. Incluí el área jurídica y los detalles relevantes proporcionados por el usuario.\n\n3. start:\nFecha y hora de inicio en formato ISO 8601, incluyendo zona horaria.\n\n4. end:\nFecha y hora de finalización en formato ISO 8601, incluyendo zona horaria. Debe ser exactamente 60 minutos posterior al inicio.\n\nEjemplo:\n\n{\n  \"title\": \"Consulta Laboral\",\n  \"description\": \"Reunión para analizar una consulta relacionada con derechos laborales.\",\n  \"start\": \"2026-11-19T17:00:00-03:00\",\n  \"end\": \"2026-11-19T18:00:00-03:00\"\n}\n\nSi se dispone del correo electrónico del cliente y la herramienta permite agregar asistentes, incorporalo correctamente.\n\nNo envíes parámetros que no estén admitidos por el esquema de la herramienta, como reminders o singleEvents.\n\n# MODIFICACIÓN Y CANCELACIÓN\n- Nunca modifiques ni canceles eventos sin autorización explícita del usuario.\n- Antes de modificar o cancelar, verificá que el evento correcto haya sido identificado.\n\n# CONTEXTO TEMPORAL\n- La fecha y hora proporcionadas en el mensaje corresponden siempre a Argentina.\n- Interpretá mañana, pasado mañana y otros términos relativos utilizando la fecha y hora recibidas.\n- Nunca utilices la hora local del servidor ni la ubicación del usuario.\n- Todas las operaciones deben respetar la zona horaria America/Argentina/Buenos_Aires.\n- Utilizá formato ISO 8601 con el offset correspondiente (-03:00).\n\n# RESTRICCIONES\n- No brindes asesoramiento jurídico definitivo.\n- No inventes leyes, artículos ni jurisprudencia.\n- No compartas información privada de otros clientes.\n- No realices acciones fuera de las herramientas autorizadas.\n- No inventes datos personales ni información de contacto.\n\n# ESCALAMIENTO\nSi la consulta requiere interpretación jurídica, decisiones profesionales o presenta información insuficiente, indicá que debe intervenir un abogado del estudio.\n\n# INFORMACIÓN DEL RESULTADO\nDespués de consultar o crear una reunión:\n- Informá si existe disponibilidad.\n- Si creaste el evento, indicá título, fecha y horario.\n- Si Google Calendar devuelve un error, explicá que no se pudo completar la operación.\n- Nunca declares una operación exitosa sin una respuesta exitosa de la herramienta.\n\n# FORMATO DE RESPUESTA\nRespondé de manera concreta, ordenada y profesional.\nPriorizá resolver la necesidad del potencial cliente y evitar preguntas innecesarias.\n## CONFIRMACIÓN POR CORREO ELECTRÓNICO\n\nDespués de crear exitosamente una cita en Google Calendar:\n\n1. Verificá que tengas el correo electrónico del cliente.\n2. Utilizá Gmail para enviar la confirmación.\n3. Informá fecha, horario, motivo y duración de la reunión.\n4. Si no tenés el correo, solicitáselo al usuario.\n5. Informá por separado si la cita fue creada y si el correo fue enviado.\n6. No afirmes que el correo fue enviado si Gmail no confirmó el éxito.",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -192,
+        -48
+      ],
+      "id": "0fcb428b-6992-4c2c-be47-fd0e9ae78c99",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=# HERRAMIENTA: CONSULTA DE AGENDA JURÍDICA\n\n## OBJETIVO\nConsultar los eventos existentes en Google Calendar del estudio jurídico para verificar la disponibilidad de horarios y recuperar información sobre reuniones previamente programadas.\n\n## CUÁNDO UTILIZARLA\nUtilizá esta herramienta cuando:\n1. El usuario solicite conocer los horarios disponibles.\n2. Necesite coordinar una reunión con un abogado.\n3. Pregunte si tiene una reunión programada para una fecha determinada.\n4. Sea necesario verificar la disponibilidad antes de crear una cita.\n5. Solicite información sobre eventos existentes en su agenda.\n\n## CUÁNDO NO UTILIZARLA\nNo utilices esta herramienta:\n1. Para responder consultas jurídicas generales.\n2. Para preguntas que no involucren reuniones o disponibilidad.\n3. Cuando el usuario no haya proporcionado una fecha o período que permita realizar una búsqueda.\n\n## PARÁMETROS DE BÚSQUEDA\n- Utilizá la fecha y el horario indicados por el usuario.\n- Si el usuario indica un día concreto, buscá los eventos correspondientes a ese día.\n- Si indica un período, consultá todo ese período.\n- Utilizá siempre la zona horaria `America/Argentina/Buenos_Aires` (UTC-03:00).\n- No inventes fechas, horarios ni parámetros.\n- Si falta una fecha o período indispensable, solicitá únicamente ese dato.\n\n## REGLAS DE CONSULTA\n1. Ejecutá la búsqueda en Google Calendar antes de informar disponibilidad.\n2. Revisá los horarios de inicio y finalización de los eventos encontrados.\n3. Considerá ocupado cualquier horario que se superponga con un evento existente.\n4. Si no se encuentran eventos en el horario solicitado, informá que no hay eventos registrados en ese período.\n5. No confundas la ausencia de resultados con una confirmación de que la herramienta se ejecutó correctamente.\n6. No reveles nombres, motivos ni información confidencial de reuniones de otros clientes. Informá únicamente si el horario está ocupado o disponible.\n\n## RESULTADO ESPERADO\nDevolvé al agente la información de los eventos encontrados, incluyendo fecha, hora de inicio y hora de finalización, para que pueda determinar la disponibilidad.\n\nEl agente deberá utilizar estos resultados para:\n- Informar si el horario solicitado está ocupado o libre.\n- Proponer alternativas cuando exista un conflicto.\n- Continuar con la creación de la cita mediante la herramienta Google Calendar – Create Event cuando el horario esté disponible.\n\nIMPORTANTE: Esta herramienta solamente consulta eventos. No crea, modifica ni elimina citas.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "30fbdb00ea08be5dbee1111b8da656dfe964b00d2164efe764cc86c2e488e027@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Calendario CoderHouse Pruebas"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $now.setZone('America/Argentina/Buenos_Aires').toISO() }}",
+        "timeMax": "={{ $now.setZone('America/Argentina/Buenos_Aires').plus({ days: 30 }).toISO() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        208
+      ],
+      "id": "fe9698c0-6eba-456e-9542-50f73a029250",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "tMpgRQtkbK3dAHcC",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=# HERRAMIENTA: ENVÍO DE CONFIRMACIÓN DE CITA\n\n## OBJETIVO\nEnviar un correo electrónico al cliente para confirmar que su reunión con el estudio jurídico fue agendada correctamente.\n\n## CUÁNDO UTILIZARLA\nUtilizá esta herramienta exclusivamente después de que Google Calendar – Create Event haya creado exitosamente una cita.\n\n## REGLAS\n1. Enviar el correo únicamente después de confirmar la creación del evento.\n2. Utilizar la dirección de correo electrónico proporcionada por el cliente.\n3. Si no se dispone del correo electrónico, solicitarlo antes de enviar.\n4. Incluir nombre del cliente, motivo, fecha y horario de la reunión.\n5. Mantener un lenguaje profesional y cordial.\n6. No enviar correos si la creación de la cita falló.\n7. No enviar confirmaciones duplicadas.\n\n## RESULTADO\nInformar al agente si el correo fue enviado correctamente o si ocurrió un error.",
+        "sendTo": "lihuelsalvo@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        -144,
+        224
+      ],
+      "id": "049d33a1-b6a4-4e88-b3d5-bd3437cd7deb",
+      "name": "Send a message in Gmail",
+      "webhookId": "b3055854-e3de-4ba6-b4cd-2e63d10dd868",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xq86xDNYhjiXgPhm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Al ejecutar esta herramienta, enviá exclusivamente los cuatro parámetros definidos:\n\ntitle: título del evento.\n\ndescription: descripción del evento.\n\nstart: fecha y hora de inicio.\n\nend: fecha y hora de finalización.\n\nNo generes parámetros adicionales ni duplicados.\n\nNo utilices los nombres Summary, Description, Start o End como parámetros independientes. Los nombres de los parámetros deben ser exclusivamente title, description, start y end.\n\nLas fechas deben enviarse como cadenas ISO 8601 con zona horaria -03:00.",
+        "calendar": {
+          "__rl": true,
+          "value": "30fbdb00ea08be5dbee1111b8da656dfe964b00d2164efe764cc86c2e488e027@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Calendario CoderHouse Pruebas"
+        },
+        "start": "={{ $fromAI('start', 'Fecha y hora de inicio ISO 8601 con zona horaria -03:00', 'string') }}",
+        "end": "={{ $fromAI('end', 'Fecha y hora de finalización ISO 8601 con zona horaria -03:00', 'string') }}",
+        "additionalFields": {
+          "attendees": [],
+          "description": "={{ $fromAI('description', 'Descripción de la reunión', 'string') }}",
+          "summary": "={{ $fromAI('title', 'Título del evento', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        192
+      ],
+      "id": "4a38c733-eac5-48b8-8e28-07043b468203",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "tMpgRQtkbK3dAHcC",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -336,
+        160
+      ],
+      "id": "8c20e957-9e32-4d64-9b04-1c0cbd76d730",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "P5CCdg3fys94XYcM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "790a6e7d-7722-4426-a337-e6393f5975d0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "738d7e38b4a4d5aff38db0e0c49ecbea7bc9f05c522a2455ab9fa6af793e227a"
+  },
+  "nodeGroups": [],
+  "id": "Unbb21Y3BdsUGCVD",
+  "tags": []
+}
