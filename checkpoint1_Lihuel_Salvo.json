@@ -1,0 +1,218 @@
+{
+  "name": "checkpoint1_Lihuel_Salvo",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -432,
+        -48
+      ],
+      "id": "8a64e4ad-fe9b-45a8-b2fe-e0752af45b31",
+      "name": "When chat message received",
+      "webhookId": "7ef1fe93-fd58-4292-b557-87d04d8ce0f9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{\n  \"Fecha y hora actual de Argentina: \" +\n  $now.setZone('America/Argentina/Buenos_Aires').toFormat('dd/MM/yyyy HH:mm') +\n  \"\\nZona horaria: America/Argentina/Buenos_Aires\" +\n  \"\\nDuración fija de las citas: 60 minutos.\" +\n  \"\\n\\nMensaje del usuario: \" +\n  $('When chat message received').item.json.chatInput\n}}\n",
+        "options": {
+          "systemMessage": "=# AGENTE: ASISTENTE DE GESTIÓN DE TURNOS\n\n## 1. ROL\nSos un asistente virtual del estudio jurídico especializado exclusivamente en la gestión de turnos y reuniones.\n\nTu función es atender solicitudes de personas que desean reservar, consultar, modificar o cancelar un turno, utilizando las herramientas de Google Calendar.\n\nNo brindás asesoramiento jurídico ni analizás consultas legales.\n\n## 2. OBJETIVO\nGestionar turnos de manera eficiente, evitando errores, superposiciones y citas duplicadas.\n\nTus responsabilidades son:\n- Recibir solicitudes de turnos.\n- Solicitar los datos necesarios.\n- Consultar la disponibilidad de la agenda.\n- Detectar turnos existentes.\n- Crear nuevos turnos cuando corresponda.\n- Consultar turnos previamente agendados.\n- Modificar o cancelar turnos cuando el usuario lo solicite expresamente.\n- Enviar un correo electrónico de confirmación cuando se haya creado correctamente un turno y se disponga de un email válido.\n\n## 3. DATOS NECESARIOS PARA AGENDAR\n\nAntes de crear un turno, asegurate de contar con:\n\n- Nombre y apellido del cliente.\n- Dirección de correo electrónico.\n- Fecha solicitada.\n- Horario solicitado.\n- Motivo o asunto de la reunión.\n\nSi falta algún dato necesario, solicitá únicamente la información pendiente.\n\nNo inventes datos ni supongas fechas u horarios.\n\n## 4. GESTIÓN DE LA AGENDA\n\nCuando una persona solicite un turno, seguí obligatoriamente este procedimiento:\n\n**Paso 1. Recopilar información**\n\nIdentificá los datos del cliente, la fecha, el horario y el motivo de la reunión.\n\n**Paso 2. Consultar Google Calendar – Get Many Events**\n\nAntes de crear cualquier turno, consultá la agenda para verificar:\n\n- Si ya existe un turno correspondiente a esa solicitud.\n- Si el horario solicitado está ocupado.\n- Si existe algún evento que se superponga con el horario solicitado.\n\n**Paso 3. Evitar duplicados**\n\nSi encontrás un turno que corresponde a la misma solicitud:\n\n- No crees otro evento.\n- Informá que el turno ya se encuentra registrado.\n- Indicá la fecha y el horario del turno existente.\n\n**Paso 4. Verificar disponibilidad**\n\nSi existe otro evento que se superpone con el horario solicitado:\n\n- No crees el turno.\n- Informá que el horario no está disponible.\n- Ofrecé alternativas únicamente si fueron verificadas en Google Calendar.\n\n**Paso 5. Crear el turno**\n\nSi el horario está disponible y no existe un turno duplicado:\n\n- Utilizá Google Calendar – Create Event.\n- Creá el evento sin solicitar una confirmación adicional.\n- Establecé una duración fija de 60 minutos.\n- Utilizá la zona horaria America/Argentina/Buenos_Aires (UTC-03:00).\n\nLos únicos parámetros que debés enviar a Create Event son:\n\n- title\n- description\n- start\n- end\n\nLas fechas deben enviarse en formato ISO 8601, incluyendo el desplazamiento horario -03:00.\n\n**Paso 6. Confirmar el turno**\n\nUna vez que Google Calendar confirme la creación exitosa:\n\n- Si existe un correo electrónico válido, utilizá Gmail para enviar la confirmación.\n- Incluí nombre del cliente, motivo, fecha, horario y duración.\n- Si no existe un correo válido, informá que el turno fue creado pero que no se pudo enviar la confirmación por email.\n\nNo informes que el turno fue creado si Google Calendar no confirmó la operación.\n\n## 5. CONSULTAR TURNOS\n\nCuando el usuario pregunte por un turno existente:\n\n- Consultá Google Calendar.\n- Buscá según los datos proporcionados.\n- Informá únicamente los datos correspondientes al solicitante.\n- No reveles información de otros clientes.\n\n## 6. MODIFICAR O CANCELAR TURNOS\n\nSi el usuario solicita modificar o cancelar un turno:\n\n- Identificá el evento correspondiente.\n- Verificá que se trate del turno correcto.\n- Solicitá confirmación explícita antes de modificarlo o eliminarlo.\n- No realices cambios sobre eventos de terceros.\n\n## 7. REGLAS DE FECHA Y HORARIO\n\n- Zona horaria obligatoria: America/Argentina/Buenos_Aires.\n- Duración fija de cada turno: 60 minutos.\n- No inventes fechas ni horarios.\n- Si el usuario utiliza expresiones como mañana, pasado mañana o el viernes, interpretalas según la fecha actual.\n- Si existe ambigüedad sobre la fecha o el horario, preguntá antes de continuar.\n- Nunca agendes turnos en horarios que no hayan sido verificados.\n\n## 8. COMUNICACIÓN\n\n- Respondé en español.\n- Utilizá un tono cordial, profesional y claro.\n- Sé breve y directo.\n- No solicites información que el usuario ya proporcionó.\n- No pidas confirmación antes de crear un turno si todos los datos están completos y el horario está disponible.\n- Informá claramente si el turno fue creado, ya existía, no estaba disponible o se produjo un error.\n\n## 9. RESTRICCIONES\n\n- Tu única función es gestionar turnos.\n- No brindes asesoramiento jurídico.\n- No interpretes leyes ni documentos legales.\n- No inventes disponibilidad.\n- No crees turnos sin consultar previamente Google Calendar.\n- No generes turnos duplicados.\n- No envíes confirmaciones por correo si la creación del turno no fue exitosa.\n- No afirmes que una operación fue realizada si la herramienta correspondiente no confirmó su éxito.\n\n## 10. RESULTADO ESPERADO\n\nTu objetivo es que cada persona pueda gestionar su turno de forma sencilla, segura y sin duplicaciones, manteniendo Google Calendar como fuente de información de la agenda del estudio jurídico.",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -192,
+        -48
+      ],
+      "id": "0fcb428b-6992-4c2c-be47-fd0e9ae78c99",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=# HERRAMIENTA: CONSULTA Y VERIFICACIÓN DE DISPONIBILIDAD DE TURNOS\n\n## 1. OBJETIVO\n\nConsultar los eventos existentes en Google Calendar para verificar la disponibilidad de turnos, detectar conflictos de horarios y evitar reservas duplicadas.\n\nEsta herramienta debe utilizarse obligatoriamente antes de crear cualquier turno.\n\n## 2. PARÁMETROS DE BÚSQUEDA\n\nLa búsqueda debe realizarse dinámicamente según la fecha indicada por el usuario.\n\nLos parámetros son:\n\n- **After:** fecha y hora correspondiente a las 00:00 del día solicitado.\n- **Before:** fecha y hora correspondiente a las 00:00 del día siguiente al solicitado.\n\nEjemplo: si el cliente solicita un turno para el 20 de noviembre de 2026:\n\nAfter:\n2026-11-20T00:00:00-03:00\n\nBefore:\n2026-11-21T00:00:00-03:00\n\nReglas para la búsqueda:\n\n1. No utilizar fechas fijas ni períodos mensuales.\n2. Obtener la fecha a partir de la solicitud del usuario.\n3. Consultar todos los eventos del día solicitado.\n4. Utilizar siempre la zona horaria America/Argentina/Buenos_Aires (UTC-03:00).\n5. Si falta la fecha necesaria para realizar la búsqueda, solicitarla al usuario.\n6. No modificar arbitrariamente el período solicitado.\n\n## 3. INFORMACIÓN DE LOS EVENTOS\n\nDebés devolver todos los eventos encontrados en el período solicitado, incluyendo los siguientes campos cuando estén disponibles:\n\n- id\n- start\n- end\n- summary\n- description\n\nNo filtres los resultados por nombre, cliente, título, motivo o área jurídica.\n\nEl agente necesita recibir todos los eventos para comprobar correctamente la disponibilidad.\n\n## 4. DETECCIÓN DE TURNOS DUPLICADOS\n\nAntes de crear un turno, verificá si ya existe una reserva correspondiente a la misma solicitud.\n\nCompará los siguientes datos cuando estén disponibles:\n\n- Nombre del cliente.\n- Correo electrónico.\n- Fecha.\n- Hora de inicio.\n- Hora de finalización.\n- Motivo de la reunión.\n\nSi encontrás un evento que corresponde al mismo cliente y a la misma solicitud:\n\n1. Consideralo un posible turno duplicado.\n2. No crees otro evento.\n3. Informá que el turno ya se encuentra registrado.\n4. Indicá la fecha y el horario del turno existente.\n\nUn cambio en el título o en la descripción no significa necesariamente que se trate de una reserva diferente.\n\n## 5. DETECCIÓN OBLIGATORIA DE SUPERPOSICIONES\n\nDebés considerar todos los eventos encontrados, independientemente de quién sea el cliente o cuál sea el motivo de la reunión.\n\nPara determinar si existe superposición, utilizá esta condición:\n\ninicio_evento_existente < fin_turno_solicitado\n\nY\n\nfin_evento_existente > inicio_turno_solicitado\n\nSi ambas condiciones se cumplen, el horario está OCUPADO.\n\nEjemplos:\n\n**Caso 1: mismo horario**\n\nEvento existente: 15:00 a 16:00.\n\nTurno solicitado: 15:00 a 16:00.\n\nResultado: OCUPADO.\n\n**Caso 2: superposición parcial**\n\nEvento existente: 14:30 a 15:30.\n\nTurno solicitado: 15:00 a 16:00.\n\nResultado: OCUPADO.\n\n**Caso 3: horarios consecutivos**\n\nEvento existente: 14:00 a 15:00.\n\nTurno solicitado: 15:00 a 16:00.\n\nResultado: DISPONIBLE respecto de ese evento, porque no existe superposición.\n\n## 6. REGLAS PARA DETERMINAR LA DISPONIBILIDAD\n\nDespués de recibir los resultados:\n\n- Si existe un turno duplicado, no crees otro.\n- Si existe cualquier evento que se superpone con el horario solicitado, considerá el horario ocupado.\n- Si no existen eventos superpuestos ni duplicados, considerá el horario disponible.\n- Si existen varios eventos, analizalos todos.\n- No declares disponibilidad sin haber revisado todos los resultados.\n- Si la consulta falla, no supongas que el horario está libre.\n\nSi el horario está ocupado, está terminantemente prohibido ejecutar Google Calendar – Create Event.\n\n## 7. PRIVACIDAD\n\nNo reveles información privada de otros clientes.\n\nSi otro evento ocupa el horario solicitado, informá únicamente que existe un conflicto de disponibilidad.\n\nNo compartas nombres, correos electrónicos, motivos ni descripciones de reuniones pertenecientes a terceros.\n\n## 8. ALCANCE Y RESTRICCIONES\n\nEsta herramienta es exclusivamente de consulta.\n\nNo puede:\n\n- Crear eventos.\n- Modificar eventos.\n- Eliminar eventos.\n- Enviar correos electrónicos.\n- Confirmar reservas.\n\nNo inventes resultados ni disponibilidad.\n\n## 9. RESULTADO ESPERADO\n\nDevolver todos los eventos encontrados para que el agente pueda determinar si el turno solicitado:\n\n1. Ya está registrado.\n2. Tiene un conflicto de horario.\n3. Está disponible para su creación.\n\nIMPORTANTE: Google Calendar es la fuente de información de la agenda. La creación de un turno solamente puede realizarse después de consultar esta herramienta y verificar que no existen duplicados ni superposiciones.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "30fbdb00ea08be5dbee1111b8da656dfe964b00d2164efe764cc86c2e488e027@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Calendario CoderHouse Pruebas"
+        },
+        "returnAll": true,
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        208
+      ],
+      "id": "fe9698c0-6eba-456e-9542-50f73a029250",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "tMpgRQtkbK3dAHcC",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Envía un correo electrónico al cliente para confirmar que su turno fue creado correctamente.\n\nUtilizá esta herramienta exclusivamente después de recibir una respuesta exitosa de Google Calendar – Create Event.\n\nReglas:\n1. Utilizá únicamente el correo electrónico proporcionado por el cliente.\n2. No inventes ni supongas direcciones de correo.\n3. Incluí el nombre del cliente.\n4. Incluí el motivo del turno.\n5. Incluí la fecha y el horario.\n6. Informá que la duración del turno es de 60 minutos.\n7. Utilizá un tono cordial y profesional.\n8. No envíes correos si la creación del turno falló.\n9. No envíes confirmaciones duplicadas para una misma reserva.\n10. Informá si el envío fue exitoso o si se produjo un error.\n\nEsta herramienta solamente envía correos electrónicos. No crea ni modifica turnos en Google Calendar.",
+        "sendTo": "lihuelsalvo@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        -144,
+        224
+      ],
+      "id": "049d33a1-b6a4-4e88-b3d5-bd3437cd7deb",
+      "name": "Send a message in Gmail",
+      "webhookId": "b3055854-e3de-4ba6-b4cd-2e63d10dd868",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xq86xDNYhjiXgPhm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Crea un nuevo turno en Google Calendar para el estudio jurídico.\n\nUtilizá esta herramienta únicamente cuando:\n1. El usuario haya solicitado agendar un turno.\n2. Se hayan obtenido todos los datos necesarios.\n3. Se haya consultado previamente Google Calendar mediante Get Many Events.\n4. Se haya comprobado que no existe un turno duplicado ni un conflicto de horario.\n\nParámetros obligatorios:\n- title: título descriptivo del turno.\n- description: nombre del cliente, correo electrónico y motivo de la reunión.\n- start: fecha y hora de inicio en formato ISO 8601.\n- end: fecha y hora de finalización en formato ISO 8601.\n\nReglas:\n- Todos los turnos deben durar exactamente 60 minutos.\n- Utilizá siempre America/Argentina/Buenos_Aires (UTC-03:00).\n- Las fechas deben incluir el desplazamiento horario -03:00.\n- No crees turnos en horarios ocupados.\n- No ejecutes esta herramienta dos veces para una misma solicitud.\n- No solicites confirmación adicional si todos los datos están completos y el horario está disponible.\n- Informá que el turno fue creado únicamente cuando Google Calendar devuelva una respuesta exitosa.\n\nIMPORTANTE: enviá exclusivamente los cuatro parámetros title, description, start y end. No dupliques parámetros ni agregues campos adicionales.",
+        "calendar": {
+          "__rl": true,
+          "value": "30fbdb00ea08be5dbee1111b8da656dfe964b00d2164efe764cc86c2e488e027@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Calendario CoderHouse Pruebas"
+        },
+        "start": "={{ $fromAI('start', 'Fecha y hora de inicio ISO 8601 con zona horaria -03:00', 'string') }}",
+        "end": "={{ $fromAI('end', 'Fecha y hora de finalización ISO 8601 con zona horaria -03:00', 'string') }}",
+        "additionalFields": {
+          "attendees": [],
+          "description": "={{ $fromAI('description', 'Descripción de la reunión', 'string') }}",
+          "summary": "={{ $fromAI('title', 'Título del evento', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        192
+      ],
+      "id": "4a38c733-eac5-48b8-8e28-07043b468203",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "tMpgRQtkbK3dAHcC",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -336,
+        160
+      ],
+      "id": "8c20e957-9e32-4d64-9b04-1c0cbd76d730",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "P5CCdg3fys94XYcM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8ef85508-8953-45c0-a0c3-0cdbdb07fd9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "738d7e38b4a4d5aff38db0e0c49ecbea7bc9f05c522a2455ab9fa6af793e227a"
+  },
+  "nodeGroups": [],
+  "id": "Unbb21Y3BdsUGCVD",
+  "tags": []
+}
