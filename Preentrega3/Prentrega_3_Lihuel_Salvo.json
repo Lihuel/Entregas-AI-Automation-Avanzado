@@ -1,0 +1,691 @@
+{
+  "name": "Prentrega_3_Lihuel_Salvo",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1456,
+        0
+      ],
+      "id": "176170f6-bfa6-46c6-801c-cafec4d5e543",
+      "name": "When chat message received",
+      "webhookId": "eb21c383-f60d-43f0-a517-4ae48b91ca88"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app4zoc59WchlG95k",
+          "mode": "list",
+          "cachedResultName": "Memoria Agente Agenda",
+          "cachedResultUrl": "https://airtable.com/app4zoc59WchlG95k"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblYmqN2DHYEfhe7i",
+          "mode": "list",
+          "cachedResultName": "Memoria Usuarios",
+          "cachedResultUrl": "https://airtable.com/app4zoc59WchlG95k/tblYmqN2DHYEfhe7i"
+        },
+        "filterByFormula": "=={{ 'Session_ID = \"' + $json.sessionId + '\"' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1232,
+        0
+      ],
+      "id": "1fdc9530-97ea-47e3-8502-b09b7a6a81e8",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cWR4kqtAlhT8W1fY",
+          "name": "BASE MEMORIA AGENDA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\"respuesta\": \"¡Hola! Puedo ayudarte a organizar tu agenda.\",\n\"nombre\": \"Juan\",\n\"resumen_consolidado \": \"El usuario está organizando su agenda semanal.\",\n\"estado_del_caso \": \"En seguimiento\",\n\"datos_clave \": \"Prefiere reuniones por la mañana.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -544,
+        240
+      ],
+      "id": "4bfb7cd4-5830-4601-8a9f-6b15f5697f8b",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "885d1d23-9d03-44d0-830d-4e5df2d17416",
+              "name": "output",
+              "value": "={{ $('Primer agente').item.json.output.respuesta }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        816,
+        32
+      ],
+      "id": "13761b13-814e-4e34-a968-144ce4b7d05c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "a04ffeaa-79d6-41da-90b2-18ba3867da39",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "P5CCdg3fys94XYcM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        272
+      ],
+      "id": "d2c55750-0f9c-4f47-ab7a-e104cf68626a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "yhGm8l8AvUGm6OoS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a914c78e-6941-4069-894d-a4af686430db",
+              "leftValue": "={{ $json.fields[\"Cantidad de mensajes\"] }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "c24ac50c-3c8b-4479-a8d5-fccaa102c023",
+      "name": "Condicional mayor a 5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "96b6c80e-8117-44e6-9e6f-be31804c4c9b",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -944,
+        0
+      ],
+      "id": "86e77eed-5a74-4fae-8c1e-8c7fc7a12f6e",
+      "name": "Vailda si existe o no el sesion id"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{\n  'Mensaje del usuario: ' + $('When chat message received').item.json.chatInput +\n  '\\n\\nMemoria previa del usuario: ' +\n  JSON.stringify($json)\n}}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Sos un asistente conversacional que ayuda al usuario a gestionar su agenda y mantiene una memoria persistente de las interacciones.\n\nRecibirás el mensaje actual del usuario y, cuando exista, información recuperada desde Airtable.\n\nDebés cumplir las siguientes funciones:\n1. Comprender el mensaje actual y responder de manera clara y natural.\n2. Utilizar la memoria previa para mantener la continuidad de la conversación.\n3. Identificar información relevante que pueda ser útil en futuras interacciones.\n4. Actualizar el resumen consolidado integrando la información previa con los nuevos datos.\n5. Identificar el nombre del usuario únicamente cuando haya sido proporcionado.\n6. Mantener actualizado el estado del caso.\n7. Registrar los datos clave que puedan ser útiles en futuras conversaciones.\n\nLa salida debe contener los siguientes campos:\n- respuesta: mensaje que recibirá el usuario.\n- nombre: nombre del usuario, si se conoce.\n- resumen_consolidado: síntesis actualizada de la información conocida.\n- estado_del_caso: situación actual del caso.\n- datos_clave: información relevante para futuras interacciones.\n\nReglas:\n- No inventes información.\n- No descartes información importante de la memoria previa.\n- Si no conocés un dato, dejalo vacío o indicá que no está definido.\n- Respondé siempre en español.\n- Diferenciá la respuesta conversacional de la información destinada a la memoria.\n- No afirmes que realizaste acciones externas, como programar reuniones, enviar invitaciones, reservar salas o consultar disponibilidades, si no tienes una herramienta conectada que permita ejecutarlas. Distingue siempre entre lo que el usuario desea hacer y lo que efectivamente se realizó."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "28413169-80eb-455d-bf8c-15de54a74e11",
+      "name": "Primer agente",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{\n  'Resumen consolidado anterior:\\n' +\n  ($json.fields['Resumen consolidado'] ?? 'Todavía no existe un resumen previo.') +\n  '\\n\\nHistorial reciente:\\n' +\n  ($json.fields['Historial reciente'] ?? '')\n}}",
+        "options": {
+          "systemMessage": "=Eres un asistente especializado en resumir conversaciones.\n\nTu tarea es actualizar la memoria consolidada de un usuario utilizando el resumen anterior y el historial reciente.\n\nInstrucciones:\n- Integra la información nueva con el resumen anterior.\n- Conserva nombres, preferencias, fechas, decisiones y datos importantes.\n- Mantén los asuntos pendientes y el estado actual del caso.\n- Elimina repeticiones y detalles conversacionales irrelevantes.\n- No inventes información ni completes datos que el usuario no haya proporcionado.\n- Escribe en español.\n- Devuelve únicamente el resumen consolidado actualizado, sin introducciones ni explicaciones.\n- Sé claro y conciso.\n- No afirmes que realizaste acciones externas, como programar reuniones, enviar invitaciones, reservar salas o consultar disponibilidades, si no tienes una herramienta conectada que permita ejecutarlas. Distingue siempre entre lo que el usuario desea hacer y lo que efectivamente se realizó."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        -336
+      ],
+      "id": "f2e0b540-f5bd-4840-a79b-5fa65854e9c7",
+      "name": "Segundo agente"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "app4zoc59WchlG95k",
+          "mode": "list",
+          "cachedResultName": "Memoria Agente Agenda",
+          "cachedResultUrl": "https://airtable.com/app4zoc59WchlG95k"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblYmqN2DHYEfhe7i",
+          "mode": "list",
+          "cachedResultName": "Memoria Usuarios",
+          "cachedResultUrl": "https://airtable.com/app4zoc59WchlG95k/tblYmqN2DHYEfhe7i"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cantidad de mensajes": 0,
+            "Session_ID": "={{ $('When chat message received').item.json.sessionId }}",
+            "Resumen consolidado": "={{ $('Segundo agente').item.json.output }}",
+            "Historial reciente": "={{ '' }}"
+          },
+          "matchingColumns": [
+            "Session_ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha de actualización",
+              "displayName": "Fecha de actualización",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen consolidado",
+              "displayName": "Resumen consolidado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado del caso",
+              "displayName": "Estado del caso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Datos clave",
+              "displayName": "Datos clave",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cantidad de mensajes",
+              "displayName": "Cantidad de mensajes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Historial reciente",
+              "displayName": "Historial reciente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -352
+      ],
+      "id": "72768d12-9e25-4dcb-9349-c6c24fbdb7d9",
+      "name": "Resumen consolidado",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cWR4kqtAlhT8W1fY",
+          "name": "BASE MEMORIA AGENDA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "app4zoc59WchlG95k",
+          "mode": "list",
+          "cachedResultName": "Memoria Agente Agenda",
+          "cachedResultUrl": "https://airtable.com/app4zoc59WchlG95k"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblYmqN2DHYEfhe7i",
+          "mode": "list",
+          "cachedResultName": "Memoria Usuarios",
+          "cachedResultUrl": "https://airtable.com/app4zoc59WchlG95k/tblYmqN2DHYEfhe7i"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cantidad de mensajes": "={{ Number($('Search records').first().json.fields?.['Cantidad de mensajes'] ?? 0) + 2 }}",
+            "Resumen consolidado": "={{ $json.output['resumen_consolidado '] }}",
+            "Estado del caso": "={{ $json.output['estado_del_caso '] }}",
+            "Session_ID": "={{ $('When chat message received').item.json.sessionId }}",
+            "Nombre": "={{ $json.output.nombre }}",
+            "Datos clave": "={{ $json.output[\"datos_clave \"] }}",
+            "Fecha de actualización": "={{ $now.toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "Session_ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha de actualización",
+              "displayName": "Fecha de actualización",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen consolidado",
+              "displayName": "Resumen consolidado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado del caso",
+              "displayName": "Estado del caso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Datos clave",
+              "displayName": "Datos clave",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cantidad de mensajes",
+              "displayName": "Cantidad de mensajes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Historial reciente",
+              "displayName": "Historial reciente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        0
+      ],
+      "id": "31fe65bb-433f-4b94-a1da-de809adb5641",
+      "name": "Carga registro",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cWR4kqtAlhT8W1fY",
+          "name": "BASE MEMORIA AGENDA"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Vailda si existe o no el sesion id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Primer agente",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Segundo agente",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Primer agente",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Condicional mayor a 5": {
+      "main": [
+        [
+          {
+            "node": "Segundo agente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vailda si existe o no el sesion id": {
+      "main": [
+        [
+          {
+            "node": "Primer agente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Primer agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Primer agente": {
+      "main": [
+        [
+          {
+            "node": "Carga registro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Segundo agente": {
+      "main": [
+        [
+          {
+            "node": "Resumen consolidado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resumen consolidado": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carga registro": {
+      "main": [
+        [
+          {
+            "node": "Condicional mayor a 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4b5a2ab5-2df8-4567-8225-d44a0accd66e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "738d7e38b4a4d5aff38db0e0c49ecbea7bc9f05c522a2455ab9fa6af793e227a"
+  },
+  "nodeGroups": [],
+  "id": "BcuHumSjYCryyw1m",
+  "tags": []
+}
